@@ -40,7 +40,7 @@ class _AllMovieState extends State<AllMovie> {
             i.value-=1;
             fetchData(i.value,widget.category);
             if(i.value==1){
-              
+              fetchData(1, widget.category);
             }
           });
         }
@@ -95,11 +95,39 @@ class _AllMovieState extends State<AllMovie> {
 
   
   Widget buildAllList(AsyncSnapshot<ItemModel> snapshot) {
+    final Orientation orientation=MediaQuery.of(context).orientation;
     while(fetchAll.length!=snapshot.data.results.length){
       fetchAll.add(snapshot.data);
       print(fetchAll);
     }
-    return GridView.builder(
+    return orientation==Orientation.landscape ?GridView.builder(
+      controller: _scrollController,
+      itemCount: fetchAll.length,
+      gridDelegate:
+      new SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        childAspectRatio: MediaQuery.of(context).size.height / 1000,
+      ),
+      itemBuilder: (BuildContext context, int index) {
+        return Container(
+          height: 100,
+          margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.0),
+            image: DecorationImage(
+              image: NetworkImage(
+                'https://image.tmdb.org/t/p/w185${snapshot.data.results[index].poster_path}',
+              ),
+              fit: BoxFit.fill
+            )
+          ),
+          child: InkResponse(
+            enableFeedback: true,
+            onTap: () => openDetailPage(snapshot.data, index),
+          ),
+        );
+      }
+    ):GridView.builder(
       controller: _scrollController,
       itemCount: fetchAll.length,
       gridDelegate:
@@ -126,7 +154,7 @@ class _AllMovieState extends State<AllMovie> {
         );
       }
     );
-  }
+  } 
 
   openDetailPage(ItemModel data, int index) {
     Navigator.push(

@@ -92,6 +92,8 @@ class MovieDetailState extends State<MovieDetail> {
                         Stack(
                           children: <Widget>[
                             Container(
+                              height: 200,
+                              width: MediaQuery.of(context).size.width,
                               child: Image(
                                 image: NetworkImage('https://image.tmdb.org/t/p/w500$backPosterUrl'),
                                 fit: BoxFit.cover,
@@ -152,7 +154,7 @@ class MovieDetailState extends State<MovieDetail> {
                       ],
                     ),
                     Positioned(
-                      top: MediaQuery.of(context).size.height / 6,
+                      top: MediaQuery.of(context).size.height / 10,
                       left: 20.0,
                       child: Card(
                         elevation: 6.0,

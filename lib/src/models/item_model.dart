@@ -10,13 +10,16 @@ class ItemModel {
     _total_results = parsedJson['total_results'];
     _total_pages = parsedJson['total_pages'];
     List<_Result> temp = [];
-    for (int i = 1; i < parsedJson['results'].length; i++) {
-      _Result result = _Result(parsedJson['results'][i]);
-      temp.add(result);
-      if(parsedJson['results'].length==0){
-
+    if(parsedJson['results'].length==null){
+      
+    }else{
+      for (int i = 1; i < parsedJson['results'].length; i++) {
+        _Result result = _Result(parsedJson['results'][i]);
+        temp.add(result);
+        
       }
     }
+    
     _results = temp;
   }
 
