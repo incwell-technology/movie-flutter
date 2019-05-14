@@ -14,10 +14,11 @@ class AllMovie extends StatefulWidget {
 }
 
 class _AllMovieState extends State<AllMovie> {
+
+  List<ItemModel> fetchAll=[];
+
   final ValueNotifier<int> i= ValueNotifier<int>(1);
   ScrollController _scrollController=ScrollController();
-
-  
 
   @override
   void initState() {
@@ -26,11 +27,23 @@ class _AllMovieState extends State<AllMovie> {
 
     fetchData(j, widget.category);
     _scrollController.addListener((){
-      if(_scrollController.position.pixels==_scrollController.position.maxScrollExtent){
-        i.value+=1;
-        fetchData(i.value,widget.category);
+      if(_scrollController.offset >=_scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange){
+        setState(() {
+            i.value+=1;
+            fetchData(i.value,widget.category);
+          });
         // print(i.value);
       }
+       if (_scrollController.offset <= _scrollController.position.minScrollExtent) {
+          setState(() {
+            i.value-=1;
+            fetchData(i.value,widget.category);
+            if(i.value==1){
+              
+            }
+          });
+        }
     });
   }
 
@@ -82,9 +95,13 @@ class _AllMovieState extends State<AllMovie> {
 
   
   Widget buildAllList(AsyncSnapshot<ItemModel> snapshot) {
+    while(fetchAll.length!=snapshot.data.results.length){
+      fetchAll.add(snapshot.data);
+      print(fetchAll);
+    }
     return GridView.builder(
       controller: _scrollController,
-      itemCount: snapshot.data.results.length,
+      itemCount: fetchAll.length,
       gridDelegate:
       new SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
