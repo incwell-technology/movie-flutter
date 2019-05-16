@@ -1,9 +1,11 @@
 import 'dart:async';
+
 import 'movie_api_provider.dart';
 import '../models/item_model.dart';
 
 class Repository {
   final moviesApiProvider = MovieApiProvider();
+  Repository();
 
   Future<ItemModel> fetchAllPopularMovies() => moviesApiProvider.fetchMovieListPopular();
 
@@ -12,7 +14,4 @@ class Repository {
   Future<ItemModel> fetchAllTopRatedMovies() => moviesApiProvider.fetchMovieListTopRated();
 
   Future<ItemModel> fetchAllUpComingMovies() => moviesApiProvider.fetchMovieListUpcoming();
-
-  
-
 }

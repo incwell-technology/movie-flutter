@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:the_movies1/src/models/cast_model.dart';
 import 'package:the_movies1/src/models/item_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'cast_all.dart';
 import '../../translations.dart';
+import 'cast_detail.dart';
 
 class MovieDetail extends StatefulWidget {
   final frontPosterUrl;
@@ -219,7 +222,9 @@ class MovieDetailState extends State<MovieDetail> {
                               ),
                               FlatButton(
                                 color: Colors.transparent,
-                                onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>MovieDetail())),
+                                onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AllCast(
+                                  movieId
+                                ))),
                                 child: Text(
                                   Translations.of(context).text('view_all'),
                                   style: TextStyle(
@@ -233,8 +238,17 @@ class MovieDetailState extends State<MovieDetail> {
                         ),
                         
                         Container(
-                          margin: EdgeInsets.only(top: 8.0),
-                          height: 100.0,
+                          child:StreamBuilder(
+                            stream: fetchCast(movieId),
+                            builder: (context,snapshot) {
+                              if (snapshot.hasData) {
+                                return buildCastList(snapshot);
+                              } else if (snapshot.hasError) {
+                                return Text(snapshot.error.toString());
+                              }
+                              return Center(child: CircularProgressIndicator());
+                            },
+                          ),
                         ),
                         Container(
                           margin: EdgeInsets.only(top: 8.0,left: 20.0),
@@ -313,6 +327,72 @@ class MovieDetailState extends State<MovieDetail> {
           );
         },
       ),
+    );
+  }
+
+  Stream<ActorsModel>fetchCast(int movieId) async*{
+    ActorsModel casts;
+    var url='https://api.themoviedb.org/3/movie/$movieId/casts?api_key=cfd028b6529b7ced061b1c3edbf1276b';
+    var response = await http.get(url);
+    var decoded = json.decode(response.body);
+    casts = ActorsModel.fromJson(decoded);
+    // print(movie.results);
+    yield casts;
+  }
+
+  Widget buildCastList(AsyncSnapshot<ActorsModel> snapshot) {
+    return Container(
+      margin: EdgeInsets.only(left: 15.0,right: 15.0),
+      height:120.0,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 6,
+        itemBuilder: (context,index){
+          return Column(
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
+                  height: 90.0,
+                  width: 90.0,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100.0),
+                    image: DecorationImage(
+                      image: NetworkImage('https://image.tmdb.org/t/p/w138_and_h175_face${snapshot.data.cast[index].profilePath}'),
+                    )
+                  ),
+                  child: InkResponse(
+                    enableFeedback: true,
+                    onTap: ()=>openDetailCast(snapshot.data, index),
+                  ),
+                ),
+                castName(snapshot.data.cast[index].name)
+                  
+              ],
+            );
+          
+        },
+      ),
+    );
+  }
+
+  Widget castName(String name){
+    String names=name.substring(0,7)+'...';
+    return Text(names);
+  }
+
+  openDetailCast(ActorsModel data, int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return CastDetail(
+          name:data.cast[index].name,
+          castId:data.cast[index].castId,
+          gender:data.cast[index].gender,
+          character:data.cast[index].character,
+          profilePath:data.cast[index].profilePath,
+          id:data.cast[index].id,
+        );
+      }),
     );
   }
 
